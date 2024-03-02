@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000000"><meta name="description" content="q"><title>q</title><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/site.webmanifest"></head><style>@font-face{font-family:Digital7;src:url(fonts/digital-7.ttf) format('truetype')}@font-face{font-family:Digital7Italic;src:url('fonts/digital-7 (italic).ttf') format('truetype')}body{background-color:#fff;color:#000;width:100vw;height:100vh;font-size:21vw;font-family:Digital7,sans-serif;overflow:hidden;display:flex;justify-content:center;align-items:center;margin:0}p#timer{text-align:center}#filter{z-index:20;position:absolute;top:0;left:0;height:100vh;width:0vw;backdrop-filter:invert(100%)}#goal{z-index:10;position:absolute;bottom:0;left:0;padding:1.5vw;font-size:3rem;font-family:Digital7Italic}</style><body onclick="toggleFullscreen()"><div id="filter"></div><p id="timer"></p><p id="goal"></p><script>if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+            console.log('Service Worker zarejestrowany:', registration);
+        })
+        .catch(error => {
+            console.log('Błąd rejestracji Service Workera:', error);
+        });
+    });
+    }
+
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+    let wakeLock = null;
+
+    async function requestWakeLock() {
+    try {
+        wakeLock = await navigator.wakeLock.request('screen');
+    } catch (err) {
+        console.error(`${err.name}, ${err.message}`);
+    }
+    }
+
+    requestWakeLock();
+
+
+    const static_timestamp = 1709377200;
+    const formatujCzas = (sekundy) => {
+        let dni = Math.floor(sekundy / (3600 * 24));
+        let godziny = Math.floor((sekundy % (3600 * 24)) / 3600);
+        let minuty = Math.floor((sekundy % 3600) / 60);
+        let sekundyReszta = sekundy % 60;
+
+        dni = dni < 10 ? "0" + dni : dni;
+        godziny = godziny < 10 ? "0" + godziny : godziny;
+        minuty = minuty < 10 ? "0" + minuty : minuty;
+        sekundyReszta = sekundyReszta < 10 ? "0" + sekundyReszta : sekundyReszta;
+        return `${dni}:${godziny}:${minuty}:${sekundyReszta}`;
+    }
+
+
+    const updateTimer = (timer) => {
+        let time = Math.round(Date.now() / 1000);
+        let elapsed = time - static_timestamp
+        timer.innerHTML = formatujCzas(elapsed);
+
+        updateCover(elapsed)
+    }
+
+    const updateCover = (elapsed) => {
+        let goalSecs = sprawdzLiczbe(elapsed)
+        let percent = Number((elapsed/goalSecs*100).toFixed(1));
+        document.getElementById("filter").style.width = percent + "vw";
+        document.getElementById("goal").innerHTML = Math.floor(elapsed/60/60)+"/"+goalSecs/60/60 + "h";
+    }
+
+    const hoursToSec = (hours) => hours*60*60;
+
+    const sprawdzLiczbe = (liczba) => {
+        let answ
+        for (let i = 0; i < 20; i++) {
+            let numberOfHours = 2**i;
+            if (liczba < hoursToSec(numberOfHours)){
+                answ = hoursToSec(numberOfHours);
+                break;
+            }
+        }
+        return answ;
+    }
+
+    const timer = document.getElementById("timer");
+    updateTimer(timer);
+    setInterval(() => updateTimer(timer), 1000);</script></body></html>
