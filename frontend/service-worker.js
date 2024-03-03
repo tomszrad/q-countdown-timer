@@ -11,7 +11,7 @@ const urlsToCache = [
   "/fonts/digital-7 (italic).ttf",
   "/custom/timestamp",
   "/custom/salt",
-  "/custom/messageScript.js",
+  "/messageScript.js",
   "/crypto-js.min.js"
 ];
 

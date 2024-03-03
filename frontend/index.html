@@ -124,12 +124,16 @@ table {
 
 
 <script>
-    function checkFileExists(url) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('HEAD', url, false);  // Synchronous request
-            xhr.send();
-            return xhr.status === 200;
+    async function checkFileExists(url) {
+        try {
+            const response = await fetch(url, { method: 'HEAD' });
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error checking file existence:', error);
+            return false;
         }
+    }
+
 
 
     function loadScript(src, callback) {
@@ -139,13 +143,16 @@ table {
             document.head.appendChild(script);
         }
 
-    if (checkFileExists("./custom/salt")) {
+    (async () => {
+        if (await checkFileExists("./custom/salt")) {
             loadScript('messageScript.js', function () {
                 console.log('Script for message loaded!');
             });
         } else {
             console.log('Script for message not loaded.');
         }
+    })();
+
 
 
     if ('serviceWorker' in navigator) {
