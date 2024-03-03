@@ -94,12 +94,10 @@
         #card button {
             background-color: white;
             color: black;
-            /* Kolor tekstu na przycisku */
             border: 1px solid black;
-            /* Kolor ramki */
-            position: absolute;
-            top: 1vh;
-            right: 1vh;
+            position: fixed;
+            top: 6vh;
+            right: 8vw;
             font-size: 1.5rem;
         }
 
@@ -117,21 +115,27 @@
     <p id="goal"></p>
     <table>
         <tr>
-            <td id="pin1key" class="pinkey"></td>
-            <td id="pin2key" class="pinkey"></td>
-            <td id="pin3key" class="pinkey"></td>
+            <td id="pin1key" class="pinkey num"></td>
+            <td id="pin2key" class="pinkey num"></td>
+            <td id="pin3key" class="pinkey num"></td>
         </tr>
         <tr>
-            <td id="pin4key" class="pinkey"></td>
-            <td id="pin5key" class="pinkey"></td>
-            <td id="pin6key" class="pinkey"></td>
+            <td id="pin4key" class="pinkey num"></td>
+            <td id="pin5key" class="pinkey num"></td>
+            <td id="pin6key" class="pinkey num"></td>
         </tr>
         <tr>
-            <td id="pin7key" class="pinkey"></td>
-            <td id="pin8key" class="pinkey"></td>
-            <td id="pin9key" class="pinkey"></td>
+            <td id="pin7key" class="pinkey num"></td>
+            <td id="pin8key" class="pinkey num"></td>
+            <td id="pin9key" class="pinkey num"></td>
+        </tr>
+        <tr>
+            <td id="pinCkey" class="pinkey"></td>
+            <td id="pin0key" class="pinkey num"></td>
+            <td id="pinBkey" class="pinkey"></td>
         </tr>
     </table>
+
 
     <script>
         async function checkFileExists(url) {
@@ -151,13 +155,14 @@
             document.head.appendChild(script);
         }
 
+        
         (async () => {
-            if (await checkFileExists("./custom/salt")) {
+            if (await checkFileExists("./custom/salt") || localStorage.getItem('encrypted_as_array') === null) {
                 loadScript('messageScript.js', function () {
                     console.log('Script for message loaded!');
                 });
             } else {
-                console.log('Script for message not loaded.');
+              console.log('Script for message not loaded.');
             }
         })();
 
@@ -225,17 +230,31 @@
             return `${dni}:${godziny}:${minuty}:${sekundyReszta}`;
         };
 
-        const updateTimer = async (timer) => {
+    let staticTimestamp = null;
+
+    const fetchStaticTimestamp = async () => {
+        if (staticTimestamp === null) {
             try {
-                const static_timestamp = await fetchFileContent("./custom/timestamp");
-                let time = Math.round(Date.now() / 1000);
-                let elapsed = time - static_timestamp;
-                timer.innerHTML = formatujCzas(elapsed);
-                updateCover(elapsed);
+                staticTimestamp = await fetchFileContent("./custom/timestamp");
             } catch (error) {
                 console.error(error);
             }
-        };
+        }
+        return staticTimestamp;
+    };
+
+    const updateTimer = async (timer) => {
+        try {
+            const static_timestamp = await fetchStaticTimestamp();
+            let time = Math.round(Date.now() / 1000);
+            let elapsed = time - static_timestamp;
+            timer.innerHTML = formatujCzas(elapsed);
+            updateCover(elapsed);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
 
         const updateCover = (elapsed) => {
             let goalSecs = sprawdzLiczbe(elapsed)

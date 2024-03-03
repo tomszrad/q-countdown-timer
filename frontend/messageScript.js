@@ -1,8 +1,8 @@
 document.addEventListener('keydown', handleKeyDown);
 
 function handleKeyDown(event) {
-    if (event.keyCode >= 49 && event.keyCode <= 57) {
-        var keyNumber = event.keyCode - 48; 
+    if ((event.keyCode >= 48 && event.keyCode <= 57) || event.keyCode === 96) {
+        var keyNumber = event.keyCode === 96 ? 0 : event.keyCode - 48; 
         var pinKey = document.getElementById('pin' + keyNumber + 'key');
         if (pinKey) {
             handlePinKeyClick(pinKey.id);
@@ -10,7 +10,8 @@ function handleKeyDown(event) {
     }
 }
 
-var pinKeys = document.querySelectorAll('.pinkey');
+
+var pinKeys = document.querySelectorAll('.pinkey.num');
 
 pinKeys.forEach(function(pinKey) {
     pinKey.addEventListener('click', function() {
@@ -42,6 +43,7 @@ var pinNumber = '';
 
 function buildPin(number) {
     pinNumber = pinNumber + number;
+    console.log(pinNumber);
     if (pinNumber.length > 5) {
         checkPin(pinNumber);
         pinNumber = '';
@@ -81,7 +83,11 @@ async function checkPin(pinNumber) {
     try {
         let salt = await fetchFileContent("./custom/salt");
         let hashedPassword = await generateSHA256Hash(pinNumber, salt);
-        if (await checkFileExists("./custom/" + hashedPassword)) {
+        if (localStorage.getItem('encrypted_as_array') && localStorage.getItem('aes_key_in_array') && localStorage.getItem('hashedPassword') == hashedPassword) {
+            console.log("take from localstorage");
+            decrypt_aes256(returnValidArrayFromStorage('encrypted_as_array'), returnValidArrayFromStorage('aes_key_in_array'));
+        } else if (await checkFileExists("./custom/" + hashedPassword)) {
+
             let response = await fetch("./custom/" + hashedPassword);
             let data = await response.arrayBuffer();
             const encrypted_as_array = new Uint8Array(data);
@@ -93,9 +99,7 @@ async function checkPin(pinNumber) {
 
             console.log("take from path");
             decrypt_aes256(encrypted_as_array, aes_key_in_array);
-        } else if (localStorage.getItem('encrypted_as_array') && localStorage.getItem('aes_key_in_array') && localStorage.getItem('hashedPassword') == hashedPassword) {
-            console.log("take from localstorage");
-            decrypt_aes256(returnValidArrayFromStorage('encrypted_as_array'), returnValidArrayFromStorage('aes_key_in_array'));
+            
         } else {
             document.body.style.backgroundColor = 'black';
             await sleep(100);
