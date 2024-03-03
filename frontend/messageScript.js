@@ -97,12 +97,14 @@ function checkPin(pinNumber) {
                 localStorage.setItem('aes_key_in_array', aes_key_in_array);
                 localStorage.setItem('hashedPassword', hashedPassword);
 
+                console.log("take from path");
                 decrypt_aes256(encrypted_as_array,aes_key_in_array);
 
             })
             .catch(error => console.error('Error fetching the file:', error));
 
         } else if (localStorage.getItem('encrypted_as_array') && localStorage.getItem('aes_key_in_array') && localStorage.getItem('hashedPassword') == hashedPassword){
+            console.log("take from localstorage");
             decrypt_aes256(returnValidArrayFromStorage('encrypted_as_array'),returnValidArrayFromStorage('aes_key_in_array'))
         } else {
             (async () => {
