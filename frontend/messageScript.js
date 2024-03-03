@@ -188,5 +188,6 @@ function makeCard(plaintext) {
 
     closeButton.addEventListener('click', function() {
         card.style.display = "none";
+        card.innerHTML = '';
     });
 }
