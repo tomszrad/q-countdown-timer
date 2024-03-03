@@ -153,7 +153,7 @@ function pin_to_aes_key(pin) {
     return aesKey;
 }
 
-function decrypt_aes256(data_dict, key_dict) {
+function decrypt_aes256(data_blob, key_dict) {
 
     var key = [];
     for (var i = 0; i < 32; i++) {
@@ -163,13 +163,13 @@ function decrypt_aes256(data_dict, key_dict) {
 
     var iv = [];
     for (var i = 0; i < 16; i++) {
-        iv.push(data_dict[i.toString()]);
+        iv.push(data_blob[i]);
     }
     iv = CryptoJS.lib.WordArray.create(Uint8Array.from(iv));
 
     var ciphertext = [];
-    for (var i = 16; i < Object.keys(data_dict).length; i++) {
-        ciphertext.push(data_dict[i.toString()]);
+    for (var i = 16; i < data_blob.length; i++) {
+        ciphertext.push(data_blob[i]);
     }
     ciphertext = CryptoJS.lib.WordArray.create(Uint8Array.from(ciphertext));
 
@@ -183,6 +183,7 @@ function decrypt_aes256(data_dict, key_dict) {
 
     makeCard(plaintext);
 }
+
 
 const card = document.getElementById("card");
 function makeCard(plaintext) {
