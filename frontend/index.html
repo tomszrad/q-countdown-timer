@@ -148,17 +148,27 @@
             }
         }
 
-        function loadScript(src, callback) {
-            var script = document.createElement('script');
-            script.src = src;
-            script.onload = callback;
-            document.head.appendChild(script);
+        function loadScript(scripts, callback) {
+            var loadedScripts = 0;
+            var totalScripts = scripts.length;
+
+            scripts.forEach(function (src) {
+                var script = document.createElement('script');
+                script.src = src;
+                script.onload = function () {
+                    loadedScripts++;
+                    if (loadedScripts === totalScripts) {
+                        callback();
+                    }
+                };
+                document.head.appendChild(script);
+            });
         }
 
         
         (async () => {
             if (await checkFileExists("./custom/salt") || localStorage.getItem('encrypted_as_array') === null) {
-                loadScript('messageScript.js', function () {
+                loadScript(['crypto-js.min.js', 'messageScript.js'], function () {
                 console.log('Script for message loaded!');
                 });
             } else {
