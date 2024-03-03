@@ -1,258 +1,267 @@
-<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000000"><meta name="description" content="q"><title>q</title><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/site.webmanifest">
-<script src="./crypto-js.min.js"></script>
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="q">
+    <title>q</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <script src="./crypto-js.min.js"></script>
+    <style>
+        @font-face {
+            font-family: Digital7;
+            src: url(fonts/digital-7.ttf) format('truetype');
+        }
+
+        @font-face {
+            font-family: Digital7Italic;
+            src: url('fonts/digital-7 (italic).ttf') format('truetype');
+        }
+
+        body {
+            background-color: #fff;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            transition: background-color 150ms ease;
+        }
+
+        p#timer {
+            text-align: center;
+            color: #000;
+            font-size: 21vw;
+            font-family: Digital7, sans-serif;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #filter {
+            z-index: 50;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 0vw;
+            backdrop-filter: invert(100%);
+            pointer-events: none;
+        }
+
+        #goal {
+            z-index: 10;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 1.5vw;
+            font-size: 3rem;
+            font-family: Digital7Italic;
+            pointer-events: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            position: fixed;
+            z-index: 40;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .pinkey {
+            background-color: transparent;
+            transition: background-color 150ms ease;
+        }
+
+        #card {
+            overflow: auto;
+            position: fixed;
+            width: 85vw;
+            height: 85vh;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2vw;
+            border: 1px solid black;
+            display: none;
+        }
+
+        #card button {
+            background-color: white;
+            color: black;
+            /* Kolor tekstu na przycisku */
+            border: 1px solid black;
+            /* Kolor ramki */
+            position: absolute;
+            top: 1vh;
+            right: 1vh;
+            font-size: 1.5rem;
+        }
+
+        #card button:hover {
+            background-color: lightgray;
+            /* Kolor tła po najechaniu */
+        }
+    </style>
 </head>
 
-<style>
-
-@font-face{
-    font-family:Digital7;
-    src:url(fonts/digital-7.ttf) format('truetype')
-}
-@font-face{
-    font-family:Digital7Italic;
-    src:url('fonts/digital-7 (italic).ttf') format('truetype')
-}
- body{
-    background-color:#fff;
-    width:100vw;
-    height:100vh;
-    overflow:hidden;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    margin:0;
-    transition: background-color 150ms ease;
-}
-p#timer{
-    text-align:center;
-    color:#000;
-    font-size:21vw;
-    font-family:Digital7,sans-serif;
-    pointer-events: none; 
-    z-index: 10;
-}
-#filter{
-    z-index:50;
-    position:fixed;
-    top:0;
-    left:0;
-    height:100vh;
-    width:0vw;
-    backdrop-filter:invert(100%);
-    pointer-events: none; 
-}
-#goal{
-    z-index:10;
-    position:fixed;
-    bottom:0;
-    left:0;
-    padding:1.5vw;
-    font-size:3rem;
-    font-family:Digital7Italic;
-    pointer-events: none; 
-}
-
-table {
-    border-collapse: collapse;
-    position: fixed;
-    z-index: 40;
-    height: 100vh;
-    width: 100vw;
-}
-
-
-.pinkey {
-  background-color: transparent;
-  transition: background-color 150ms ease;
-}
-
-#card{
-    overflow: auto;
-    position: fixed;
-    width: 85vw;
-    height: 85vh;
-    z-index: 100;
-    background-color: rgba(255,255,255,0.9);
-    padding: 2vw;
-    border: 1px solid black;
-
-    display: none;
-}
-
-#card button {
-    background-color: white;
-    color: black; /* Kolor tekstu na przycisku */
-    border: 1px solid black; /* Kolor ramki */
-    position: absolute;
-    top: 1vh;
-    right: 1vh;
-    font-size: 1.5rem;
-}
-
-#card button:hover {
-    background-color: lightgray; /* Kolor tła po najechaniu */
-}
-
-</style>
-
 <body>
-<div id="card">
-    
-</div>
+    <div id="card"></div>
+    <div id="filter"></div>
+    <p id="timer"></p>
+    <p id="goal"></p>
+    <table>
+        <tr>
+            <td id="pin1key" class="pinkey"></td>
+            <td id="pin2key" class="pinkey"></td>
+            <td id="pin3key" class="pinkey"></td>
+        </tr>
+        <tr>
+            <td id="pin4key" class="pinkey"></td>
+            <td id="pin5key" class="pinkey"></td>
+            <td id="pin6key" class="pinkey"></td>
+        </tr>
+        <tr>
+            <td id="pin7key" class="pinkey"></td>
+            <td id="pin8key" class="pinkey"></td>
+            <td id="pin9key" class="pinkey"></td>
+        </tr>
+    </table>
 
-    <div id="filter"></div><p id="timer"></p><p id="goal"></p>
-
-        <table>
-            <tr>
-                <td id="pin1key" class="pinkey"></td>
-                <td id="pin2key" class="pinkey"></td>
-                <td id="pin3key" class="pinkey"></td>
-            </tr>
-            <tr>
-                <td id="pin4key" class="pinkey"></td>
-                <td id="pin5key" class="pinkey"></td>
-                <td id="pin6key" class="pinkey"></td>
-            </tr>
-            <tr>
-                <td id="pin7key" class="pinkey"></td>
-                <td id="pin8key" class="pinkey"></td>
-                <td id="pin9key" class="pinkey"></td>
-            </tr>
-
-
-        </table>
-
-
-<script>
-    async function checkFileExists(url) {
-        try {
-            const response = await fetch(url, { method: 'HEAD' });
-            return response.status === 200;
-        } catch (error) {
-            console.error('Error checking file existence:', error);
-            return false;
+    <script>
+        async function checkFileExists(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                return response.status === 200;
+            } catch (error) {
+                console.error('Error checking file existence:', error);
+                return false;
+            }
         }
-    }
 
-
-
-    function loadScript(src, callback) {
+        function loadScript(src, callback) {
             var script = document.createElement('script');
             script.src = src;
             script.onload = callback;
             document.head.appendChild(script);
         }
 
-    (async () => {
-        if (await checkFileExists("./custom/salt")) {
-            loadScript('messageScript.js', function () {
-                console.log('Script for message loaded!');
+        (async () => {
+            if (await checkFileExists("./custom/salt")) {
+                loadScript('messageScript.js', function () {
+                    console.log('Script for message loaded!');
+                });
+            } else {
+                console.log('Script for message not loaded.');
+            }
+        })();
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker zarejestrowany:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Błąd rejestracji Service Workera:', error);
+                    });
             });
-        } else {
-            console.log('Script for message not loaded.');
-        }
-    })();
-
-
-
-    if ('serviceWorker' in navigator) {
-        
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js')
-            .then(registration => {
-                console.log('Service Worker zarejestrowany:', registration);
-            })
-            .catch(error => {
-                console.log('Błąd rejestracji Service Workera:', error);
-            });
-        });
         }
 
-
-
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-            });
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
         }
-    }
 
-    document.addEventListener('dblclick', toggleFullscreen);
+        document.addEventListener('dblclick', toggleFullscreen);
 
-    let wakeLock = null;
+        let wakeLock = null;
 
-    async function requestWakeLock() {
-    try {
-        wakeLock = await navigator.wakeLock.request('screen');
-    } catch (err) {
-        console.error(`${err.name}, ${err.message}`);
-    }
-    }
+        async function requestWakeLock() {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        }
 
-    requestWakeLock();
+        requestWakeLock();
 
-    function fetchFileContent(src) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", src, false);
-            xhr.send();
-            if (xhr.status === 200) {
-                return xhr.responseText;
-            } else {
-                console.error("Error fetching file:", xhr.statusText);
+        async function fetchFileContent(src) {
+            try {
+                const response = await fetch(src);
+                if (!response.ok) {
+                    throw new Error("Error fetching file: " + response.statusText);
+                }
+                return await response.text();
+            } catch (error) {
+                console.error(error);
                 return null;
             }
         }
 
+        const formatujCzas = (sekundy) => {
+            let dni = Math.floor(sekundy / (3600 * 24));
+            let godziny = Math.floor((sekundy % (3600 * 24)) / 3600);
+            let minuty = Math.floor((sekundy % 3600) / 60);
+            let sekundyReszta = sekundy % 60;
 
-    const static_timestamp = fetchFileContent("./custom/timestamp");
-    const formatujCzas = (sekundy) => {
-        let dni = Math.floor(sekundy / (3600 * 24));
-        let godziny = Math.floor((sekundy % (3600 * 24)) / 3600);
-        let minuty = Math.floor((sekundy % 3600) / 60);
-        let sekundyReszta = sekundy % 60;
+            dni = dni < 10 ? "0" + dni : dni;
+            godziny = godziny < 10 ? "0" + godziny : godziny;
+            minuty = minuty < 10 ? "0" + minuty : minuty;
+            sekundyReszta = sekundyReszta < 10 ? "0" + sekundyReszta : sekundyReszta;
+            return `${dni}:${godziny}:${minuty}:${sekundyReszta}`;
+        };
 
-        dni = dni < 10 ? "0" + dni : dni;
-        godziny = godziny < 10 ? "0" + godziny : godziny;
-        minuty = minuty < 10 ? "0" + minuty : minuty;
-        sekundyReszta = sekundyReszta < 10 ? "0" + sekundyReszta : sekundyReszta;
-        return `${dni}:${godziny}:${minuty}:${sekundyReszta}`;
-    }
-
-
-    const updateTimer = (timer) => {
-        let time = Math.round(Date.now() / 1000);
-        let elapsed = time - static_timestamp
-        timer.innerHTML = formatujCzas(elapsed);
-
-        updateCover(elapsed)
-    }
-
-    const updateCover = (elapsed) => {
-        let goalSecs = sprawdzLiczbe(elapsed)
-        let percent = Number((elapsed/goalSecs*100).toFixed(1));
-        document.getElementById("filter").style.width = percent + "vw";
-        document.getElementById("goal").innerHTML = Math.floor(elapsed/60/60)+"/"+goalSecs/60/60 + "h";
-    }
-
-    const hoursToSec = (hours) => hours*60*60;
-
-    const sprawdzLiczbe = (liczba) => {
-        let answ
-        for (let i = 0; i < 20; i++) {
-            let numberOfHours = 2**i;
-            if (liczba < hoursToSec(numberOfHours)){
-                answ = hoursToSec(numberOfHours);
-                break;
+        const updateTimer = async (timer) => {
+            try {
+                const static_timestamp = await fetchFileContent("./custom/timestamp");
+                let time = Math.round(Date.now() / 1000);
+                let elapsed = time - static_timestamp;
+                timer.innerHTML = formatujCzas(elapsed);
+                updateCover(elapsed);
+            } catch (error) {
+                console.error(error);
             }
-        }
-        return answ;
-    }
+        };
 
-    const timer = document.getElementById("timer");
-    updateTimer(timer);
-    setInterval(() => updateTimer(timer), 1000);</script></body></html>
+        const updateCover = (elapsed) => {
+            let goalSecs = sprawdzLiczbe(elapsed)
+            let percent = Number((elapsed / goalSecs * 100).toFixed(1));
+            document.getElementById("filter").style.width = percent + "vw";
+            document.getElementById("goal").innerHTML = Math.floor(elapsed / 60 / 60) + "/" + goalSecs / 60 / 60 + "h";
+        };
+
+        const hoursToSec = (hours) => hours * 60 * 60;
+
+        const sprawdzLiczbe = (liczba) => {
+            let answ
+            for (let i = 0; i < 20; i++) {
+                let numberOfHours = 2 ** i;
+                if (liczba < hoursToSec(numberOfHours)) {
+                    answ = hoursToSec(numberOfHours);
+                    break;
+                }
+            }
+            return answ;
+        };
+
+        const timer = document.getElementById("timer");
+        updateTimer(timer);
+        setInterval(() => updateTimer(timer), 1000);
+    </script>
+</body>
+
+</html>

@@ -1,7 +1,6 @@
 document.addEventListener('keydown', handleKeyDown);
 
 function handleKeyDown(event) {
-
     if (event.keyCode >= 49 && event.keyCode <= 57) {
         var keyNumber = event.keyCode - 48; 
         var pinKey = document.getElementById('pin' + keyNumber + 'key');
@@ -21,11 +20,10 @@ pinKeys.forEach(function(pinKey) {
 
 function handlePinKeyClick(id) {
     console.log('Kliknięto komórkę o id:', id);
-
 }
 
 function sleep(ms) {
-return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function handlePinKeyClick(keyid) {
@@ -41,26 +39,24 @@ function handlePinKeyClick(keyid) {
 }
 
 var pinNumber = '';
-function buildPin(number)   {
+
+function buildPin(number) {
     pinNumber = pinNumber + number;
-    if (pinNumber.length > 5){
+    if (pinNumber.length > 5) {
         checkPin(pinNumber);
         pinNumber = '';
     }
 }
 
 function generateSHA256Hash(input, salt) {
-
     var saltedInput = salt + input;
 
     var crypto = window.crypto || window.msCrypto;
     if (crypto.subtle) {
-
         var encoder = new TextEncoder();
         var data = encoder.encode(saltedInput);
 
         return crypto.subtle.digest('SHA-256', data).then(function(hashBuffer) {
-
             var hashArray = Array.from(new Uint8Array(hashBuffer));
             var hashHex = hashArray.map(function(byte) {
                 return ('00' + byte.toString(16)).slice(-2);
@@ -76,49 +72,38 @@ function generateSHA256Hash(input, salt) {
     }
 }
 
-function returnValidArrayFromStorage(itemname){
+function returnValidArrayFromStorage(itemname) {
     let array = localStorage.getItem(itemname).split(",").map(Number);
-    return storagedEncryptedDataArrayToValidObject = new Uint8Array(array)
+    return storagedEncryptedDataArrayToValidObject = new Uint8Array(array);
 }
 
-function checkPin(pinNumber) {
+async function checkPin(pinNumber) {
+    try {
+        let salt = await fetchFileContent("./custom/salt");
+        let hashedPassword = await generateSHA256Hash(pinNumber, salt);
+        if (await checkFileExists("./custom/" + hashedPassword)) {
+            let response = await fetch("./custom/" + hashedPassword);
+            let data = await response.arrayBuffer();
+            const encrypted_as_array = new Uint8Array(data);
+            const aes_key_in_array = pin_to_aes_key(pinNumber);
 
-    let salt = fetchFileContent("./custom/salt");
-    generateSHA256Hash(pinNumber, salt).then(hashedPassword => {
-        if (checkFileExists("./custom/" + hashedPassword)) {
+            localStorage.setItem('encrypted_as_array', encrypted_as_array);
+            localStorage.setItem('aes_key_in_array', aes_key_in_array);
+            localStorage.setItem('hashedPassword', hashedPassword);
 
-        fetch("./custom/" + hashedPassword)
-            .then(response => response.arrayBuffer())
-            .then(data => {
-                const encrypted_as_array = new Uint8Array(data);
-                const aes_key_in_array = pin_to_aes_key(pinNumber);
-
-                localStorage.setItem('encrypted_as_array', encrypted_as_array);
-                localStorage.setItem('aes_key_in_array', aes_key_in_array);
-                localStorage.setItem('hashedPassword', hashedPassword);
-
-                console.log("take from path");
-                decrypt_aes256(encrypted_as_array,aes_key_in_array);
-
-            })
-            .catch(error => console.error('Error fetching the file:', error));
-
-        } else if (localStorage.getItem('encrypted_as_array') && localStorage.getItem('aes_key_in_array') && localStorage.getItem('hashedPassword') == hashedPassword){
+            console.log("take from path");
+            decrypt_aes256(encrypted_as_array, aes_key_in_array);
+        } else if (localStorage.getItem('encrypted_as_array') && localStorage.getItem('aes_key_in_array') && localStorage.getItem('hashedPassword') == hashedPassword) {
             console.log("take from localstorage");
-            decrypt_aes256(returnValidArrayFromStorage('encrypted_as_array'),returnValidArrayFromStorage('aes_key_in_array'))
+            decrypt_aes256(returnValidArrayFromStorage('encrypted_as_array'), returnValidArrayFromStorage('aes_key_in_array'));
         } else {
-            (async () => {
-                document.body.style.backgroundColor = 'black';
-                await sleep(100);
-                document.body.style.backgroundColor = '#fff';
-
-            })();
+            document.body.style.backgroundColor = 'black';
+            await sleep(100);
+            document.body.style.backgroundColor = '#fff';
         }
-
-    }).catch(error => {
+    } catch (error) {
         console.error('Error:', error);
-    });
-
+    }
 }
 
 function pinToAESKey(pin) {
@@ -135,7 +120,6 @@ function pinToAESKey(pin) {
 }
 
 function pin_to_aes_key(pin) {
-
     if (typeof pin !== 'string' || !/^\d{6}$/.test(pin)) {
         throw new Error('PIN must contain 6 digits.');
     }
@@ -154,7 +138,6 @@ function pin_to_aes_key(pin) {
 }
 
 function decrypt_aes256(data_blob, key_dict) {
-
     var key = [];
     for (var i = 0; i < 32; i++) {
         key.push(key_dict[i.toString()]);
@@ -184,16 +167,15 @@ function decrypt_aes256(data_blob, key_dict) {
     makeCard(plaintext);
 }
 
-
 const card = document.getElementById("card");
+
 function makeCard(plaintext) {
     card.innerHTML = plaintext + "<button id='closeCard'>✕</button>";
-    card.style.display = "block"
+    card.style.display = "block";
 
     const closeButton = document.getElementById('closeCard');
 
     closeButton.addEventListener('click', function() {
-        card.style.display = "none"
+        card.style.display = "none";
     });
-
 }
