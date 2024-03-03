@@ -12,6 +12,7 @@ const urlsToCache = [
   "/custom/timestamp",
   "/custom/salt",
   "/custom/messageScript.js",
+  "crypto-js.min.js"
 ];
 
 self.addEventListener("install", (event) => {
