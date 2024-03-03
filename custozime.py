@@ -6,14 +6,17 @@ from cryptography.hazmat.backends import default_backend
 from typing import Union
 import time
 import secrets
+import glob
 
 def ask_user_for_message():
-    use_message = input("Do you want to use a message? (Y/N): ").strip().upper()
-    
-    if use_message == 'Y':
+    """
+    Asks the user if they want to use a message and performs actions accordingly.
+    """
+    use_message = input("Do you want to use a message? (default: y) [y/n]: ").strip().upper()
+
+    if use_message == 'Y' or use_message == '':
         file_path = get_existing_file_path()
         pin = get_six_digit_pin()
-
 
         if os.path.exists("./frontend/custom/salt"):
             generate_salt()
@@ -22,12 +25,8 @@ def ask_user_for_message():
 
         remove_other_files("./frontend/custom/salt")
 
-
-        hashed_filename=sha256(pin)
+        hashed_filename = sha256(pin)
         pin_to_key = pin_to_aes_key(pin)
-
-
-
 
         with open("./frontend/custom/timestamp", "w") as file:
             file.write(str(timestamp))
@@ -40,23 +39,20 @@ def ask_user_for_message():
         print("Invalid input. Please enter Y or N.")
         ask_user_for_message()
 
-
-
 def generateSaltFile():
-        # Generate a new salt
+    """
+    Generates a new salt and saves it to a file.
+    """
     new_salt = secrets.token_hex(16)
-
-    # Write the new salt to the file
     with open('./frontend/custom/salt', 'w') as f:
         f.write(new_salt)
-    
     print("New salt generated and saved to './frontend/custom/salt'")
 
 def generate_salt():
-    # Ask the user if they want to generate a new salt
+    """
+    Prompts the user to generate a new salt and calls `generateSaltFile` accordingly.
+    """
     generate_new_salt = input("Do you want to generate a new salt? (default: y) [y/n]: ").lower()
-
-    # Default to generating a new salt if the user doesn't provide input
     if generate_new_salt == '' or generate_new_salt == 'y':
         generateSaltFile()
     elif generate_new_salt == 'n':
@@ -64,33 +60,40 @@ def generate_salt():
     else:
         print("Invalid input. Please enter 'y' or 'n'.")
 
-
-
 def remove_other_files(file_to_keep):
-    # Get the directory of the file to keep
+    """
+    Removes all other files in the directory except the specified file.
+    """
     directory = os.path.dirname(file_to_keep)
-    
-    # Get a list of all files in the directory
     files = os.listdir(directory)
-    
-    # Remove the specified file from the list
     files.remove(os.path.basename(file_to_keep))
-    
-    # Remove all other files
     for file in files:
         file_path = os.path.join(directory, file)
         os.remove(file_path)
-        #print(f"Removed: {file_path}")
 
-def get_timestamp(prompt="Enter 10-digit timestamp:"):
+def get_timestamp():
+    """
+    Gets the timestamp either from the file or from user input.
+    """
+    timestamp_path = 'frontend/custom/timestamp'
+    if os.path.isfile(timestamp_path):
+        timestampExist = True
+        with open(timestamp_path, 'r') as plik:
+            timestamp_from_file = plik.read()
+        prompt = f"Enter 10-digit timestamp (press Enter for {timestamp_from_file}):"
+    else:
+        timestampExist = False
+        prompt = "Enter 10-digit timestamp:"
+
     while True:
         timestamp_str = input(prompt)
-        if len(timestamp_str) != 10:
+        if timestamp_str.strip() == "" and timestampExist:
+            return timestamp_from_file
+        elif len(timestamp_str) != 10:
             print("Invalid timestamp format. Timestamp should have exactly 10 digits.")
             continue
         try:
             timestamp = int(timestamp_str)
-            # Check if the timestamp is within a reasonable range
             if timestamp >= 0 and timestamp <= int(time.time()) + 10*365*24*3600:  # 10 years in seconds
                 return timestamp
             else:
@@ -99,60 +102,55 @@ def get_timestamp(prompt="Enter 10-digit timestamp:"):
             print("Invalid input. Please enter a valid integer timestamp.")
 
 def pin_to_aes_key(pin: Union[str, int]) -> bytes:
-    # Check if pin is a string and contains exactly 6 digits
+    """
+    Converts PIN to AES key.
+    """
     if not isinstance(pin, str) or not pin.isdigit() or len(pin) != 6:
         raise ValueError('PIN must contain 6 digits.')
 
-    # Pad the PIN to 8 bytes with '0'
     padded_pin = pin.ljust(8, '0')
-
-    # Encode the padded PIN to bytes
     pin_bytes = padded_pin.encode()
-
-    # Initialize an AES key byte array
     aes_key = bytearray(32)
 
-    # Set the AES key by repeating the PIN bytes
     for i in range(0, 32, len(pin_bytes)):
         aes_key[i:i+len(pin_bytes)] = pin_bytes
 
     return bytes(aes_key)
 
 def encrypt_file_aes256(input_file, output_file, key):
-    # Read the input file
+    """
+    Encrypts a file using AES256.
+    """
     with open(input_file, 'rb') as f:
         plaintext = f.read()
 
-    # Generate an initialization vector (IV)
     iv = os.urandom(16)
-
-    # Pad the plaintext to match the block size
     padder = padding.PKCS7(algorithms.AES.block_size).padder()
     padded_plaintext = padder.update(plaintext) + padder.finalize()
 
-    # Create an AES256 cipher
     cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
     encryptor = cipher.encryptor()
-
-    # Encrypt the plaintext
     ciphertext = encryptor.update(padded_plaintext) + encryptor.finalize()
 
-    # Write the IV and ciphertext to the output file
     with open(output_file, 'wb') as f:
         f.write(iv)
         f.write(ciphertext)
 
-
 def sha256(message):
+    """
+    Calculates SHA256 hash of a message concatenated with salt.
+    """
     with open('./frontend/custom/salt', 'r') as file:
-        salt = file.read().strip()  
-
+        salt = file.read().strip()
     message_with_salt = salt + message;
     message_bytes = message_with_salt.encode('utf-8')
     sha256_hash = hashlib.sha256(message_bytes).hexdigest()
     return sha256_hash
 
 def get_six_digit_pin():
+    """
+    Gets a 6-digit PIN from the user.
+    """
     while True:
         pin = input("Enter your 6-digit PIN for content encryption: ")
         if pin.isdigit() and len(pin) == 6:
@@ -160,20 +158,25 @@ def get_six_digit_pin():
         else:
             print("Invalid input. PIN must be a 6-digit number.")
 
-def get_existing_file_path(prompt="Enter file path: "):
+def get_existing_file_path():
+    """
+    Gets the path of an existing file from the user.
+    """
+    html_files = glob.glob("*.html")
+    if html_files:
+        prompt = f"Enter file path (press Enter for {html_files[0]}): "
+    else:
+        prompt = "Enter file path: "
+
     while True:
         file_path = input(prompt)
-        if os.path.exists(file_path):
+        if file_path == '' and html_files:
+            file_path = html_files[0]
+            return file_path
+        elif os.path.exists(file_path):
             return file_path
         else:
             print("File does not exist. Please enter a valid file path.")
 
-
 timestamp = get_timestamp()
 ask_user_for_message()
-
-
-
-
-
-
