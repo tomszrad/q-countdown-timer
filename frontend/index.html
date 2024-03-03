@@ -228,18 +228,22 @@
             }
         }
 
-        const formatujCzas = (sekundy) => {
-            let dni = Math.floor(sekundy / (3600 * 24));
-            let godziny = Math.floor((sekundy % (3600 * 24)) / 3600);
-            let minuty = Math.floor((sekundy % 3600) / 60);
-            let sekundyReszta = sekundy % 60;
+    const formatujCzas = (sekundy) => {
+        let minus = sekundy < 0 ? "-" : "";
+        sekundy = Math.abs(sekundy);
+        let dni = Math.floor(sekundy / (3600 * 24));
+        let godziny = Math.floor((sekundy % (3600 * 24)) / 3600);
+        let minuty = Math.floor((sekundy % 3600) / 60);
+        let sekundyReszta = sekundy % 60;
 
-            dni = dni < 10 ? "0" + dni : dni;
-            godziny = godziny < 10 ? "0" + godziny : godziny;
-            minuty = minuty < 10 ? "0" + minuty : minuty;
-            sekundyReszta = sekundyReszta < 10 ? "0" + sekundyReszta : sekundyReszta;
-            return `${dni}:${godziny}:${minuty}:${sekundyReszta}`;
-        };
+        dni = dni < 10 ? "0" + dni : dni;
+        godziny = godziny < 10 ? "0" + godziny : godziny;
+        minuty = minuty < 10 ? "0" + minuty : minuty;
+        sekundyReszta = sekundyReszta < 10 ? "0" + sekundyReszta : sekundyReszta;
+
+        return `${minus}${dni}:${godziny}:${minuty}:${sekundyReszta}`;
+    };
+
 
     let staticTimestamp = null;
 
