@@ -43,7 +43,6 @@ var pinNumber = '';
 
 function buildPin(number) {
     pinNumber = pinNumber + number;
-    console.log(pinNumber);
     if (pinNumber.length > 5) {
         checkPin(pinNumber);
         pinNumber = '';
@@ -99,7 +98,7 @@ async function checkPin(pinNumber) {
 
             console.log("take from path");
             decrypt_aes256(encrypted_as_array, aes_key_in_array);
-            
+
         } else {
             document.body.style.backgroundColor = 'black';
             await sleep(100);
