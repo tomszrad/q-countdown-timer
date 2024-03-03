@@ -10,6 +10,14 @@ function handleKeyDown(event) {
     }
 }
 
+document.getElementById("pinCkey").addEventListener("click", function() {
+  toggleFullscreen();
+});
+
+document.getElementById("pinBkey").addEventListener("click", function() {
+  toggleFullscreen();
+});
+
 
 var pinKeys = document.querySelectorAll('.pinkey.num');
 

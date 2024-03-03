@@ -159,10 +159,11 @@
         (async () => {
             if (await checkFileExists("./custom/salt") || localStorage.getItem('encrypted_as_array') === null) {
                 loadScript('messageScript.js', function () {
-                    console.log('Script for message loaded!');
+                console.log('Script for message loaded!');
                 });
             } else {
-              console.log('Script for message not loaded.');
+                document.addEventListener('dblclick', toggleFullscreen);
+                console.log('Script for message not loaded.');
             }
         })();
 
@@ -190,7 +191,7 @@
             }
         }
 
-        document.addEventListener('dblclick', toggleFullscreen);
+        
 
         let wakeLock = null;
 
