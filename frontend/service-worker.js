@@ -9,6 +9,9 @@ const urlsToCache = [
   "/favicon-16x16.png",
   "/fonts/digital-7.ttf",
   "/fonts/digital-7 (italic).ttf",
+  "/custom/timestamp",
+  "/custom/salt",
+  "/custom/messageScript.js",
 ];
 
 self.addEventListener("install", (event) => {

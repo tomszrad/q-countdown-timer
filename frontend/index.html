@@ -1,14 +1,166 @@
-<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000000"><meta name="description" content="q"><title>q</title><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/site.webmanifest"></head><style>@font-face{font-family:Digital7;src:url(fonts/digital-7.ttf) format('truetype')}@font-face{font-family:Digital7Italic;src:url('fonts/digital-7 (italic).ttf') format('truetype')}body{background-color:#fff;color:#000;width:100vw;height:100vh;font-size:21vw;font-family:Digital7,sans-serif;overflow:hidden;display:flex;justify-content:center;align-items:center;margin:0}p#timer{text-align:center}#filter{z-index:20;position:absolute;top:0;left:0;height:100vh;width:0vw;backdrop-filter:invert(100%)}#goal{z-index:10;position:absolute;bottom:0;left:0;padding:1.5vw;font-size:3rem;font-family:Digital7Italic}</style><body onclick="toggleFullscreen()"><div id="filter"></div><p id="timer"></p><p id="goal"></p><script>if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-        .then(registration => {
-            console.log('Service Worker zarejestrowany:', registration);
-        })
-        .catch(error => {
-            console.log('Błąd rejestracji Service Workera:', error);
+<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000000"><meta name="description" content="q"><title>q</title><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/site.webmanifest">
+<script src="./crypto-js.min.js"></script>
+</head>
+
+<style>
+
+@font-face{
+    font-family:Digital7;
+    src:url(fonts/digital-7.ttf) format('truetype')
+}
+@font-face{
+    font-family:Digital7Italic;
+    src:url('fonts/digital-7 (italic).ttf') format('truetype')
+}
+ body{
+    background-color:#fff;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:0;
+    transition: background-color 150ms ease;
+}
+p#timer{
+    text-align:center;
+    color:#000;
+    font-size:21vw;
+    font-family:Digital7,sans-serif;
+    pointer-events: none; 
+    z-index: 10;
+}
+#filter{
+    z-index:50;
+    position:fixed;
+    top:0;
+    left:0;
+    height:100vh;
+    width:0vw;
+    backdrop-filter:invert(100%);
+    pointer-events: none; 
+}
+#goal{
+    z-index:10;
+    position:fixed;
+    bottom:0;
+    left:0;
+    padding:1.5vw;
+    font-size:3rem;
+    font-family:Digital7Italic;
+    pointer-events: none; 
+}
+
+table {
+    border-collapse: collapse;
+    position: fixed;
+    z-index: 40;
+    height: 100vh;
+    width: 100vw;
+}
+
+
+.pinkey {
+  background-color: transparent;
+  transition: background-color 150ms ease;
+}
+
+#card{
+    overflow: auto;
+    position: fixed;
+    width: 85vw;
+    height: 85vh;
+    z-index: 100;
+    background-color: rgba(255,255,255,0.9);
+    padding: 2vw;
+    border: 1px solid black;
+
+    display: none;
+}
+
+#card button {
+    background-color: white;
+    color: black; /* Kolor tekstu na przycisku */
+    border: 1px solid black; /* Kolor ramki */
+    position: absolute;
+    top: 1vh;
+    right: 1vh;
+    font-size: 1.5rem;
+}
+
+#card button:hover {
+    background-color: lightgray; /* Kolor tła po najechaniu */
+}
+
+</style>
+
+<body>
+<div id="card">
+    
+</div>
+
+    <div id="filter"></div><p id="timer"></p><p id="goal"></p>
+
+        <table>
+            <tr>
+                <td id="pin1key" class="pinkey"></td>
+                <td id="pin2key" class="pinkey"></td>
+                <td id="pin3key" class="pinkey"></td>
+            </tr>
+            <tr>
+                <td id="pin4key" class="pinkey"></td>
+                <td id="pin5key" class="pinkey"></td>
+                <td id="pin6key" class="pinkey"></td>
+            </tr>
+            <tr>
+                <td id="pin7key" class="pinkey"></td>
+                <td id="pin8key" class="pinkey"></td>
+                <td id="pin9key" class="pinkey"></td>
+            </tr>
+
+
+        </table>
+
+
+<script>
+    function checkFileExists(url) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('HEAD', url, false);  // Synchronous request
+            xhr.send();
+            return xhr.status === 200;
+        }
+
+
+    function loadScript(src, callback) {
+            var script = document.createElement('script');
+            script.src = src;
+            script.onload = callback;
+            document.head.appendChild(script);
+        }
+
+    if (checkFileExists("./custom/salt")) {
+            loadScript('messageScript.js', function () {
+                console.log('Script for message loaded!');
+            });
+        } else {
+            console.log('Script for message not loaded.');
+        }
+
+
+    if ('serviceWorker' in navigator) {
+        
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+                console.log('Service Worker zarejestrowany:', registration);
+            })
+            .catch(error => {
+                console.log('Błąd rejestracji Service Workera:', error);
+            });
         });
-    });
-    }
+        }
+
 
 
     function toggleFullscreen() {
@@ -23,6 +175,8 @@
         }
     }
 
+    document.addEventListener('dblclick', toggleFullscreen);
+
     let wakeLock = null;
 
     async function requestWakeLock() {
@@ -35,8 +189,20 @@
 
     requestWakeLock();
 
+    function fetchFileContent(src) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", src, false);
+            xhr.send();
+            if (xhr.status === 200) {
+                return xhr.responseText;
+            } else {
+                console.error("Error fetching file:", xhr.statusText);
+                return null;
+            }
+        }
 
-    const static_timestamp = 1709377200;
+
+    const static_timestamp = fetchFileContent("./custom/timestamp");
     const formatujCzas = (sekundy) => {
         let dni = Math.floor(sekundy / (3600 * 24));
         let godziny = Math.floor((sekundy % (3600 * 24)) / 3600);
