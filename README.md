@@ -2,7 +2,7 @@
 
 ## What is it?
 
-A countdown timer from when you are, for example, on some sort of rehab. You can add a pin-secured message about the details.
+A countdown timer with ability to add a pin-encrypted message.
 
 ## Installation
 
